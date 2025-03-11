@@ -1,11 +1,12 @@
 'use client'
 import React from 'react'
 import clsx from 'clsx'
+import Loader from '@/app/components/Loader'
 
 interface ButtonProps {
   type?: 'button' | 'submit' | 'reset' | undefined;
   fullWidth?: boolean;
-  children?: React.ReactNode;  // Fixed spelling
+  children?: React.ReactNode;
   onClick?: () => void;
   secondary?: boolean;
   danger?: boolean;
@@ -14,7 +15,7 @@ interface ButtonProps {
 const Button: React.FC<ButtonProps> = ({
   type,
   fullWidth,
-  children,  // Fixed spelling
+  children,
   onClick,
   secondary,
   danger,
@@ -22,13 +23,14 @@ const Button: React.FC<ButtonProps> = ({
 }) => {
   return (
     <button
-    onClick={onClick} 
-    type={type}
-    disabled={disabled}
-    className={clsx(`
+      onClick={onClick} 
+      type={type}
+      disabled={disabled}
+      className={clsx(`
         flex justify-center rounded-md px-2 py-2 
         font-semibold text-sm focus-visible:outline 
         focus-visible:outline-2 focus-visible:outline-offset-2       
+        items-center  
         `,
         disabled && "opacity-50 cursor-default",
         fullWidth && "w-full",
@@ -37,7 +39,7 @@ const Button: React.FC<ButtonProps> = ({
         !secondary && !danger && 'bg-sky-500 hover:bg-sky-600 focus-visible:outline-sky-600'
       )}
     >
-      {children}
+      {disabled ? <Loader secondary={secondary} /> : children}
     </button>
   )
 }

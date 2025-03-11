@@ -6,8 +6,16 @@ import Input from './Input';
 import Button from '../Button';
 import AuthSocialButton from './AuthSocialButton';
 import { BsGithub, BsGoogle } from 'react-icons/bs';
+import toast from 'react-hot-toast';
+import axios from 'axios';
+import { signIn } from 'next-auth/react'
+import { useRouter } from 'next/navigation';
+
+
+
 type Varient = 'LOGIN' | 'REGISTER';
 const Auth = () => {
+    const router = useRouter();
     const [varient, setVarient] = useState<Varient>('LOGIN');
     const [Loading, setLoading] = useState(false);
     const toggleVarient = () => {
@@ -34,17 +42,55 @@ const Auth = () => {
         setLoading(true);
 
         if (varient === 'LOGIN') {
-            // Login logic here
+            signIn('credentials',{
+                ...data, redirect:false
+            } 
+            ).then((res) => {
+                if (res?.error) {
+                    toast.error('Invalid Credentials');
+                    setLoading(false);
+                }
+                if(res?.ok){
+                    toast.success('Login successful');
+                    setLoading(false);
+                    
+                }
+            }
+        )
         }
-        else {
-            // Register logic here
+        if(varient === 'REGISTER') {
+            axios.post('/api/register', data)
+            .then(() => {
+                toast.success('Registration successful!');
+                toggleVarient();
+            })
+            .catch((err) => {
+                toast.error(err?.response?.data?.error || 'Something went wrong!');
+            })
+            .finally(() => {
+                setLoading(false);
+            });
         }
     }
 
     const socialAction = (action: string) => {
         setLoading(true);
-        //NextAuth social login logic here
+        
+        signIn(action, { redirect: false })
+        .then((res) => {
+           if (res?.error) {
+                toast.error('Something went wrong!');
+            }
+            else if (res?.ok) {
+                toast.success('Login successful');
+                console.log(res);
+            }
+        })
+        .finally(() => {
+            setLoading(false);
+        });
     }
+
     return (
         <div className='mt-8 sm:mx-auto sm:w-full sm:max-w-md'>
             <div className='bg-white px-4 py-8 rounded-lg sm:px-10'>
