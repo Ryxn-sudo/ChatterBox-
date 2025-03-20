@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { FieldValue, FieldValues, useForm, SubmitHandler } from 'react-hook-form';
 import Input from './Input';
 import Button from '../Button';
@@ -8,16 +8,28 @@ import AuthSocialButton from './AuthSocialButton';
 import { BsGithub, BsGoogle } from 'react-icons/bs';
 import toast from 'react-hot-toast';
 import axios from 'axios';
-import { signIn } from 'next-auth/react'
+import { signIn, useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation';
+
 
 
 
 type Varient = 'LOGIN' | 'REGISTER';
 const Auth = () => {
+    const session = useSession();
     const router = useRouter();
     const [varient, setVarient] = useState<Varient>('LOGIN');
     const [Loading, setLoading] = useState(false);
+
+    useEffect(()=> {
+        if(session?.status ==='authenticated'){
+            console.log('Authticated')
+            router.push('/users')
+        }
+    },[session?.status ,router])
+
+
+
     const toggleVarient = () => {
         if (varient === 'LOGIN') {
             setVarient('REGISTER');
@@ -53,7 +65,7 @@ const Auth = () => {
                 if(res?.ok){
                     toast.success('Login successful');
                     setLoading(false);
-                    
+                    router.push('/users')
                 }
             }
         )
@@ -62,7 +74,7 @@ const Auth = () => {
             axios.post('/api/register', data)
             .then(() => {
                 toast.success('Registration successful!');
-                toggleVarient();
+                signIn('credentials',data)
             })
             .catch((err) => {
                 toast.error(err?.response?.data?.error || 'Something went wrong!');
@@ -84,6 +96,7 @@ const Auth = () => {
             else if (res?.ok) {
                 toast.success('Login successful');
                 console.log(res);
+                router.push('/users');
             }
         })
         .finally(() => {
